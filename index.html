@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthManager.fit | Your Personalized Diet Planner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00E676;
+            --primary-dark: #00C853;
+            --secondary: #6200EA;
+            --accent: #FF4081;
+            --dark: #121212;
+            --light: #f8f9fa;
+            --gray: #757575;
+            --card-bg: #1E1E1E;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #121212 0%, #1E1E1E 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            perspective: 1000px;
+        }
+
+        .free-banner {
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
+            color: white;
+            text-align: center;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 64, 129, 0.3);
+            transform: translateZ(20px);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translateZ(20px) scale(1); }
+            50% { transform: translateZ(20px) scale(1.03); }
+            100% { transform: translateZ(20px) scale(1); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            transform-style: preserve-3d;
+        }
+
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 230, 118, 0.2);
+        }
+
+        .tagline {
+            color: var(--gray);
+            font-weight: 300;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--gray);
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            transform-style: preserve-3d;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0,230,118,0.1) 0%, rgba(0,0,0,0) 70%);
+            transform: rotate(30deg);
+            z-index: 0;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 3rem;
+            z-index: 1;
+        }
+
+        .progress-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: -1;
+            border-radius: 10px;
+        }
+
+        .progress-step {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-weight: bold;
+            position: relative;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            transform: translateZ(20px);
+        }
+
+        .progress-step.active {
+            background: var(--primary-dark);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 230, 118, 0.4);
+            transform: translateZ(30px) scale(1.1);
+        }
+
+        .progress-step.completed {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .progress-step i {
+            display: none;
+        }
+
+        .progress-step.completed i {
+            display: block;
+        }
+
+        .progress-step.completed span {
+            display: none;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform-style: preserve-3d;
+            transform: rotateY(10deg);
+            opacity: 0;
+        }
+
+        .form-step.active {
+            display: block;
+            transform: rotateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px) rotateY(10deg); }
+            to { opacity: 1; transform: translateY(0) rotateY(0); }
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+            z-index: 1;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.2);
+            background: rgba(0, 230, 118, 0.05);
+            transform: translateZ(10px);
+        }
+
+        .input-3d {
+            transform-style: preserve-3d;
+            transform: translateZ(10px);
+        }
+
+        .unit-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .unit-toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--gray);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .unit-toggle-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .radio-option, .checkbox-option {
+            position: relative;
+        }
+
+        .radio-option input, .checkbox-option input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .radio-label, .checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            transform: translateZ(5px);
+        }
+
+        .radio-label:hover, .checkbox-label:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateZ(10px);
+        }
+
+        .radio-option input:checked + .radio-label,
+        .checkbox-option input:checked + .checkbox-label {
+            background: rgba(0, 230, 118, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 230, 118, 0.2);
+            transform: translateZ(15px);
+        }
+
+        .radio-label::before, .checkbox-label::before {
+            content: '';
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--gray);
+            border-radius: 50%;
+            margin-right: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .checkbox-label::before {
+            border-radius: 4px;
+        }
+
+        .radio-option input:checked + .radio-label::before {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: inset 0 0 0 3px var(--card-bg);
+        }
+
+        .checkbox-option input:checked + .checkbox-label::before {
+            background: var(--primary);
+            border-color: var(--primary);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex: 1;
+            transform-style: preserve-3d;
+        }
+
+        button:active {
+            transform: translateY(2px) translateZ(0);
+        }
+
+        .btn-prev {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--gray);
+            transform: translateZ(10px);
+        }
+
+        .btn-prev:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateZ(20px);
+        }
+
+        .btn-next, .btn-submit {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 230, 118, 0.4);
+            transform: translateZ(20px);
+        }
+
+        .btn-next:hover, .btn-submit:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.6);
+            transform: translateZ(30px);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--secondary) 0%, #7C4DFF 100%);
+            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.4);
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #7C4DFF 0%, var(--secondary) 100%);
+            box-shadow: 0 8px 25px rgba(98, 0, 234, 0.6);
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            display: none;
+            transform-style: preserve-3d;
+            animation: fadeIn 0.6s forwards;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            animation: bounce 1s infinite alternate;
+            transform: translateZ(30px);
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0) translateZ(30px); }
+            to { transform: translateY(-20px) translateZ(30px); }
+        }
+
+        .success-message h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            background: none;
+            -webkit-background-clip: initial;
+            background-clip: initial;
+            color: var(--primary);
+        }
+
+        .success-message p {
+            color: var(--gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+            transform: translateZ(20px);
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateZ(30px);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            filter: blur(30px);
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-50px) rotate(180deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+            }
+
+            .progress-step {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="floating-shapes">
+            <div class="shape" style="width: 200px; height: 200px; top: -50px; left: -50px; animation-delay: 0s;"></div>
+            <div class="shape" style="width: 300px; height: 300px; bottom: -100px; right: -100px; animation-delay: 2s;"></div>
+            <div class="shape" style="width: 150px; height: 150px; top: 30%; right: -50px; animation-delay: 4s;"></div>
+        </div>
+
+        <div class="free-banner">
+            🎉 Get Your First Diet Plan FREE! Limited Time Offer
+        </div>
+
+        <header>
+            <div class="logo">HealthManager.fit</div>
+            <div class="tagline">"Your Personalized Path to Optimal Health & Nutrition"</div>
+            <p class="subtitle">Complete this form to receive a custom diet plan tailored for your location and preferences</p>
+        </header>
+        
+        <div class="form-container">
+            <div class="progress-container">
+                <div class="progress-step active" data-step="1">
+                    <span>1</span>
+                    <i class="fas fa-check" style="display: none;"></i>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <span>2</span>
+                    <i class="fas fa-check" style="display: none;"></i>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <span>3</span>
+                    <i class="fas fa-check" style="display: none;"></i>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <span>4</span>
+                    <i class="fas fa-check" style="display: none;"></i>
+                </div>
+                <div class="progress-step" data-step="5">
+                    <span>5</span>
+                    <i class="fas fa-check" style="display: none;"></i>
+                </div>
+            </div>
+            
+            <form id="dietForm">
+                <!-- Step 1: Basic Details -->
+                <div class="form-step active" data-step="1">
+                    <h2>Basic Details</h2>
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" class="input-3d" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="12" max="100" class="input-3d" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" class="input-3d" required>
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                            <option value="prefer-not-to-say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City/Location</label>
+                        <input type="text" id="city" name="city" class="input-3d" required placeholder="To suggest locally available foods">
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn-next" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Diet & Food Preferences -->
+                <div class="form-step" data-step="2">
+                    <h2>Diet & Food Preferences</h2>
+                    <div class="form-group">
+                        <label>Height</label>
+                        <div class="unit-toggle">
+                            <button type="button" class="unit-toggle-btn active" onclick="toggleHeightUnit('cm')">cm</button>
+                            <button type="button" class="unit-toggle-btn" onclick="toggleHeightUnit('ft')">ft & inches</button>
+                        </div>
+                        <div id="height-cm-group">
+                            <input type="number" id="height-cm" name="height-cm" min="100" max="250" class="input-3d" placeholder="Height in cm" required>
+                        </div>
+                        <div id="height-ft-group" style="display: none;">
+                            <div style="display: flex; gap: 1rem;">
+                                <input type="number" id="height-ft" name="height-ft" min="3" max="8" class="input-3d" placeholder="Feet" style="flex: 1;">
+                                <input type="number" id="height-in" name="height-in" min="0" max="11" class="input-3d" placeholder="Inches" style="flex: 1;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="weight" min="30" max="200" class="input-3d" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Goal</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="weight-loss" name="goal" value="weight-loss" checked>
+                                <label for="weight-loss" class="radio-label">Weight Loss</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="weight-gain" name="goal" value="weight-gain">
+                                <label for="weight-gain" class="radio-label">Weight Gain</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="muscle-gain" name="goal" value="muscle-gain">
+                                <label for="muscle-gain" class="radio-label">Muscle Gain</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="general-health" name="goal" value="general-health">
+                                <label for="general-health" class="radio-label">General Health</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Diet Type</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="vegetarian" name="diet-type" value="vegetarian">
+                                <label for="vegetarian" class="radio-label">Vegetarian</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="non-veg" name="diet-type" value="non-vegetarian" checked>
+                                <label for="non-veg" class="radio-label">Non-Vegetarian</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="vegan" name="diet-type" value="vegan">
+                                <label for="vegan" class="radio-label">Vegan</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="eggetarian" name="diet-type" value="eggetarian">
+                                <label for="eggetarian" class="radio-label">Eggetarian</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Cuisines</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="indian" name="cuisine" value="indian" checked>
+                                <label for="indian" class="checkbox-label">Indian</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="continental" name="cuisine" value="continental">
+                                <label for="continental" class="checkbox-label">Continental</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="south-indian" name="cuisine" value="south-indian">
+                                <label for="south-indian" class="checkbox-label">South Indian</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="north-indian" name="cuisine" value="north-indian">
+                                <label for="north-indian" class="checkbox-label">North Indian</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="mediterranean" name="cuisine" value="mediterranean">
+                                <label for="mediterranean" class="checkbox-label">Mediterranean</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="other-cuisine" name="cuisine" value="other">
+                                <label for="other-cuisine" class="checkbox-label">Other</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">Monthly Food Budget</label>
+                        <select id="budget" name="budget" class="input-3d" required>
+                            <option value="">Select</option>
+                            <option value="low">Low (₹5,000-10,000)</option>
+                            <option value="medium">Medium (₹10,000-20,000)</option>
+                            <option value="high">High (₹20,000+)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn-prev" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Health & Lifestyle -->
+                <div class="form-step" data-step="3">
+                    <h2>Health & Lifestyle</h2>
+                    <div class="form-group">
+                        <label for="health-conditions">Health Conditions</label>
+                        <textarea id="health-conditions" name="health-conditions" rows="3" class="input-3d" placeholder="Diabetes, hypertension, PCOS, etc. (if any)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="allergies">Allergies</label>
+                        <input type="text" id="allergies" name="allergies" class="input-3d" placeholder="Lactose, gluten, seafood, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="activity">Activity Level</label>
+                        <select id="activity" name="activity" class="input-3d" required>
+                            <option value="">Select</option>
+                            <option value="sedentary">Sedentary (little or no exercise)</option>
+                            <option value="moderate">Moderate (exercise 1-3 days/week)</option>
+                            <option value="active">Active (exercise 4-5 days/week)</option>
+                            <option value="very-active">Very Active (daily exercise)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="food-dislikes">Food Dislikes/Preferences</label>
+                        <textarea id="food-dislikes" name="food-dislikes" rows="3" class="input-3d" placeholder="No spicy food, dislike certain veggies, etc."></textarea>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn-prev" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Step 4: City-Specific Questions -->
+                <div class="form-step" data-step="4">
+                    <h2>Local Food Preferences</h2>
+                    <div class="form-group">
+                        <label>Local Food Availability</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="local-available" name="local-food" value="available" checked>
+                                <label for="local-available" class="radio-label">Good availability</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="local-limited" name="local-food" value="limited">
+                                <label for="local-limited" class="radio-label">Limited options</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Do you prefer locally available grains and vegetables?</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="local-pref-yes" name="local-pref" value="yes" checked>
+                                <label for="local-pref-yes" class="radio-label">Yes</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="local-pref-no" name="local-pref" value="no">
+                                <label for="local-pref-no" class="radio-label">No</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="local-pref-sometimes" name="local-pref" value="sometimes">
+                                <label for="local-pref-sometimes" class="radio-label">Sometimes</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Are you open to seasonal fruits and vegetables?</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="seasonal-yes" name="seasonal" value="yes" checked>
+                                <label for="seasonal-yes" class="radio-label">Yes</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="seasonal-no" name="seasonal" value="no">
+                                <label for="seasonal-no" class="radio-label">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="traditional-dishes">Any traditional/local dishes you prefer or want included?</label>
+                        <textarea id="traditional-dishes" name="traditional-dishes" rows="3" class="input-3d" placeholder="List any local dishes you'd like included"></textarea>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn-prev" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep()">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Step 5: Contact & Final Details -->
+                <div class="form-step" data-step="5">
+                    <h2>Final Details</h2>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="input-3d" required placeholder="For updates and clarifications">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email ID</label>
+                        <input type="email" id="email" name="email" class="input-3d" required placeholder="To send your diet plan">
+                    </div>
+                    <div class="form-group">
+                        <label for="daily-routine">Daily Routine</label>
+                        <textarea id="daily-routine" name="daily-routine" rows="3" class="input-3d" placeholder="Wake-up time, work hours, sleep time (to plan meal timings)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-history">Medical History or Medications (if any)</label>
+                        <textarea id="medical-history" name="medical-history" rows="3" class="input-3d" placeholder="Any relevant medical history or current medications"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="additional-notes">Additional Notes</label>
+                        <textarea id="additional-notes" name="additional-notes" rows="3" class="input-3d" placeholder="Any other important information"></textarea>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn-prev" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn-submit" onclick="submitForm()">Get My Free Plan <i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="success-message">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Success!</h2>
+                <p>Your information has been submitted successfully.</p>
+                <p>We're preparing your personalized diet plan based on your location and preferences.</p>
+                <p>You'll be redirected to WhatsApp automatically to confirm details...</p>
+                <a href="#" class="whatsapp-btn" id="whatsappBtn" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Open WhatsApp Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+        const YOUR_WHATSAPP_NUMBER = "919570661297"; // Your WhatsApp number
+        let heightUnit = 'cm'; // Default height unit
+        
+        function toggleHeightUnit(unit) {
+            heightUnit = unit;
+            document.querySelectorAll('.unit-toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('height-cm-group').style.display = unit === 'cm' ? 'block' : 'none';
+            document.getElementById('height-ft-group').style.display = unit === 'ft' ? 'block' : 'none';
+        }
+        
+        function updateProgressBar() {
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                if (index + 1 < currentStep) {
+                    step.classList.remove('active');
+                    step.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+        }
+        
+        function showStep(step) {
+            document.querySelectorAll('.form-step').forEach(formStep => {
+                formStep.classList.remove('active');
+            });
+            
+            const nextStep = document.querySelector(`.form-step[data-step="${step}"]`);
+            nextStep.classList.add('active');
+            updateProgressBar();
+            
+            // 3D animation effect
+            nextStep.style.transform = 'rotateY(10deg)';
+            nextStep.style.opacity = '0';
+            setTimeout(() => {
+                nextStep.style.transform = 'rotateY(0)';
+                nextStep.style.opacity = '1';
+            }, 10);
+        }
+        
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+        
+        function validateStep(step) {
+            let isValid = true;
+            const currentFormStep = document.querySelector(`.form-step[data-step="${step}"]`);
+            const requiredInputs = currentFormStep.querySelectorAll('[required]');
+            
+            requiredInputs.forEach(input => {
+                if (!input.value) {
+                    input.style.borderColor = '#ff4444';
+                    input.style.boxShadow = '0 0 0 2px rgba(255, 68, 68, 0.2)';
+                    isValid = false;
+                    
+                    // Shake animation for invalid fields
+                    input.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        input.style.animation = '';
+                    }, 500);
+                } else {
+                    input.style.borderColor = '';
+                    input.style.boxShadow = '';
+                }
+            });
+            
+            // Validate height based on selected unit
+            if (step === 2) {
+                if (heightUnit === 'cm' && !document.getElementById('height-cm').value) {
+                    document.getElementById('height-cm').style.borderColor = '#ff4444';
+                    document.getElementById('height-cm').style.boxShadow = '0 0 0 2px rgba(255, 68, 68, 0.2)';
+                    isValid = false;
+                } else if (heightUnit === 'ft' && (!document.getElementById('height-ft').value || !document.getElementById('height-in').value)) {
+                    document.getElementById('height-ft').style.borderColor = '#ff4444';
+                    document.getElementById('height-ft').style.boxShadow = '0 0 0 2px rgba(255, 68, 68, 0.2)';
+                    document.getElementById('height-in').style.borderColor = '#ff4444';
+                    document.getElementById('height-in').style.boxShadow = '0 0 0 2px rgba(255, 68, 68, 0.2)';
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                // Add shake animation to the entire step
+                currentFormStep.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    currentFormStep.style.animation = '';
+                }, 500);
+                
+                alert('Please fill all required fields');
+            }
+            
+            return isValid;
+        }
+        
+        function submitForm() {
+            if (validateStep(currentStep)) {
+                // Convert height to cm if in feet/inches
+                let heightInCm;
+                if (heightUnit === 'ft') {
+                    const feet = parseFloat(document.getElementById('height-ft').value) || 0;
+                    const inches = parseFloat(document.getElementById('height-in').value) || 0;
+                    heightInCm = Math.round((feet * 30.48) + (inches * 2.54));
+                } else {
+                    heightInCm = document.getElementById('height-cm').value;
+                }
+                
+                // Collect all form data
+                const formData = {
+                    name: document.getElementById('name').value,
+                    age: document.getElementById('age').value,
+                    gender: document.getElementById('gender').value,
+                    city: document.getElementById('city').value,
+                    height: heightInCm,
+                    weight: document.getElementById('weight').value,
+                    goal: document.querySelector('input[name="goal"]:checked').value,
+                    dietType: document.querySelector('input[name="diet-type"]:checked').value,
+                    cuisines: Array.from(document.querySelectorAll('input[name="cuisine"]:checked')).map(el => el.value),
+                    budget: document.getElementById('budget').value,
+                    healthConditions: document.getElementById('health-conditions').value,
+                    allergies: document.getElementById('allergies').value,
+                    activity: document.getElementById('activity').value,
+                    foodDislikes: document.getElementById('food-dislikes').value,
+                    localFood: document.querySelector('input[name="local-food"]:checked').value,
+                    localPref: document.querySelector('input[name="local-pref"]:checked').value,
+                    seasonal: document.querySelector('input[name="seasonal"]:checked').value,
+                    traditionalDishes: document.getElementById('traditional-dishes').value,
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value,
+                    dailyRoutine: document.getElementById('daily-routine').value,
+                    medicalHistory: document.getElementById('medical-history').value,
+                    additionalNotes: document.getElementById('additional-notes').value
+                };
+                
+                // Format WhatsApp message
+                const whatsappMessage = formatWhatsAppMessage(formData);
+                
+                // Hide form and show success message
+                document.getElementById('dietForm').style.display = 'none';
+                document.querySelector('.progress-container').style.display = 'none';
+                document.querySelector('.success-message').style.display = 'block';
+                
+                // Set up WhatsApp button and auto-redirect
+                const whatsappBtn = document.getElementById('whatsappBtn');
+                const whatsappUrl = `https://wa.me/${YOUR_WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
+                whatsappBtn.href = whatsappUrl;
+                
+                // Auto-redirect to WhatsApp after 3 seconds
+                setTimeout(() => {
+                    window.open(whatsappUrl, '_blank');
+                }, 3000);
+            }
+        }
+        
+        function formatWhatsAppMessage(data) {
+            return `🌟 *HealthManager.fit - New Diet Plan Request* 🌟%0A%0A` +
+                   `👤 *Personal Details*%0A` +
+                   `• Name: ${data.name}%0A` +
+                   `• Age: ${data.age}%0A` +
+                   `• Gender: ${data.gender}%0A` +
+                   `• City: ${data.city}%0A%0A` +
+                   `📏 *Body Metrics*%0A` +
+                   `• Height: ${data.height} cm%0A` +
+                   `• Weight: ${data.weight} kg%0A` +
+                   `• Goal: ${data.goal}%0A%0A` +
+                   `🍽️ *Diet Preferences*%0A` +
+                   `• Diet Type: ${data.dietType}%0A` +
+                   `• Preferred Cuisines: ${data.cuisines.join(', ')}%0A` +
+                   `• Budget: ${data.budget}%0A` +
+                   `• Food Dislikes: ${data.foodDislikes || 'None'}%0A%0A` +
+                   `⚕️ *Health Information*%0A` +
+                   `• Health Conditions: ${data.healthConditions || 'None'}%0A` +
+                   `• Allergies: ${data.allergies || 'None'}%0A` +
+                   `• Activity Level: ${data.activity}%0A` +
+                   `• Medical History: ${data.medicalHistory || 'None'}%0A%0A` +
+                   `🏙️ *Local Preferences*%0A` +
+                   `• Local Food Availability: ${data.localFood}%0A` +
+                   `• Prefers Local Produce: ${data.localPref}%0A` +
+                   `• Open to Seasonal Foods: ${data.seasonal}%0A` +
+                   `• Traditional Dishes: ${data.traditionalDishes || 'None'}%0A%0A` +
+                   `📞 *Contact Information*%0A` +
+                   `• Phone: ${data.phone}%0A` +
+                   `• Email: ${data.email}%0A%0A` +
+                   `⏰ *Daily Routine*%0A` +
+                   `${data.dailyRoutine || 'Not specified'}%0A%0A` +
+                   `📝 *Additional Notes*%0A` +
+                   `${data.additionalNotes || 'None'}%0A%0A` +
+                   `Please create a personalized diet plan with local ${data.city} options.`;
+        }
+
+        // Add shake animation to CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0) translateZ(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) translateZ(0); }
+                20%, 40%, 60%, 80% { transform: translateX(5px) translateZ(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
